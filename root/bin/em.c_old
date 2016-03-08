@@ -480,7 +480,7 @@ void cpu(uint pc, uint sp)
     static char rbuf[4096]; // XXX
 
     a = b = c = timer = timeout = fpc = tsp = fsp = 0;
-    cycle = delta = 1;
+    cycle = delta = 4096;
     xcycle = delta * 4;
     kbchar = -1;
     xpc = 0;
@@ -510,8 +510,6 @@ next:
               pfd.events = POLLIN;
               if (poll(&pfd, 1, 0) == 1 && read(0, &ch, 1) == 1) {
                 kbchar = ch;
-                // print the key you've pressed.
-                dprintf(2, "\nkey pressed: [%d]%c\n", ch, ch);
                 if (kbchar == '`') { dprintf(2,"ungraceful exit. cycle = %u\n", cycle + (int)((uint)xpc - xcycle)/4); return; }
                 if (iena) { trap = FKEYBD; iena = 0; goto interrupt; }
                 ipend |= FKEYBD;
@@ -520,7 +518,7 @@ next:
             if (timeout) {
               timer += delta;
               if (timer >= timeout) { // XXX  // any interrupt actually!
-                // dprintf(2,"timeout! timer=%d, timeout=%d\n",timer,timeout);
+                dprintf(2,"timeout! timer=%d, timeout=%d\n",timer,timeout);
                 timer = 0;
                 if (iena) { trap = FTIMER; iena = 0; goto interrupt; }
                 ipend |= FTIMER;
